@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Buscaminas</title>
+
+  <!-- Tipografías de Google Fonts: una para títulos y otra monoespaciada para los marcadores -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Nuestra hoja de estilos (archivo aparte) -->
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <!-- Contenedor general del juego -->
+  <main class="app">
+
+    <!-- Cabecera: título y subtítulo -->
+    <header class="head">
+      <h1 class="title">Buscaminas<span class="dot"></span></h1>
+      <p class="subtitle">Despeja el campo sin pisar una mina</p>
+    </header>
+
+    <!-- Selector de dificultad. Cada botón guarda su nivel en data-level -->
+    <nav class="levels" id="levels" aria-label="Dificultad">
+      <button class="level active" data-level="facil">Fácil · 9×9</button>
+      <button class="level" data-level="medio">Intermedio · 16×16</button>
+      <button class="level" data-level="experto">Experto · 16×30</button>
+    </nav>
+
+    <!-- Marco principal del juego -->
+    <section class="frame">
+
+      <!-- HUD: contador de minas | carita | cronómetro -->
+      <div class="hud">
+        <div class="display" id="mineDisplay" title="Minas restantes">
+          <span class="ico">🚩</span><span id="mineCount">010</span>
+        </div>
+        <button class="face" id="face" title="Nueva partida" aria-label="Nueva partida">🙂</button>
+        <div class="display time" id="timeDisplay" title="Tiempo">
+          <span class="ico">⏱</span><span id="time">000</span>
+        </div>
+      </div>
+
+      <!-- El tablero. Está vacío: el JavaScript crea las celdas dentro -->
+      <div class="board-wrap">
+        <div class="board" id="board" role="grid" aria-label="Tablero de buscaminas"></div>
+      </div>
+
+      <!-- Controles inferiores: modo bandera (para móvil) y ayuda -->
+      <div class="controls">
+        <button class="flag-toggle" id="flagToggle" aria-pressed="false">
+          <span>🚩</span> Modo bandera
+        </button>
+        <p class="hint">
+          Clic izquierdo: revelar · Clic derecho: bandera<br>
+          En móvil: mantén pulsado para poner bandera
+        </p>
+      </div>
+
+      <!-- Mensaje de victoria o derrota -->
+      <p class="msg" id="msg" role="status"></p>
+    </section>
+  </main>
+
+  <!-- Nuestro JavaScript (archivo aparte). Va al final para que el HTML ya exista -->
+  <script src="buscaminas.js"></script>
+</body>
+</html>

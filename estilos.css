@@ -1,0 +1,218 @@
+/* ======================================================================
+   BUSCAMINAS — Estilos
+   Paleta "noche arcade": fondo azul-pizarra profundo, fichas con relieve
+   suave y acento coral para las banderas.
+   ====================================================================== */
+
+/* ====== TOKENS DE DISEÑO ======
+   Variables CSS centralizadas: si quieres cambiar un color o el tamaño
+   de celda, lo haces aquí una sola vez. */
+:root{
+  --bg:        #14161f;
+  --bg-2:      #1b1e2b;
+  --panel:     #232739;
+  --tile:      #313752;   /* celda sin revelar (relieve) */
+  --tile-hi:   #3d456a;   /* brillo superior de la ficha */
+  --tile-lo:   #232842;   /* sombra inferior de la ficha */
+  --open:      #191c28;   /* celda revelada (hundida) */
+  --open-2:    #1d2130;
+  --line:      #0e1018;
+  --accent:    #ff6b6b;   /* coral: banderas / activo */
+  --accent-2:  #ffb454;   /* ámbar: destellos */
+  --text:      #e8ebf5;
+  --muted:     #8b91ab;
+
+  /* colores de los números (1–8), legibles sobre celda oscura */
+  --n1:#4aa3ff; --n2:#3ddc84; --n3:#ff5b5b; --n4:#b07bff;
+  --n5:#ffb454; --n6:#2dd4bf; --n7:#e2e8f0; --n8:#9aa3bf;
+
+  --cell: 34px;           /* tamaño de celda (el JS lo ajusta al cargar) */
+  --radius: 6px;
+}
+
+/* Reset básico: quita márgenes/rellenos por defecto y unifica el modelo de caja */
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+/* Cuerpo: centra el juego en pantalla y pone el fondo degradado */
+body{
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  font-family:"Space Grotesk", system-ui, sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(900px 500px at 50% -10%, #262b42 0%, transparent 60%),
+    var(--bg);
+  overflow-x:hidden;
+}
+
+.app{ width:min(100%, 720px); }
+
+/* ---- Cabecera ---- */
+.head{ text-align:center; margin-bottom:18px; }
+.title{
+  font-size:clamp(28px, 7vw, 44px);   /* tamaño que se adapta a la pantalla */
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  display:inline-flex; align-items:center; gap:.4em;
+}
+/* El puntito rojo del título que late suavemente */
+.title .dot{
+  width:.34em; height:.34em; border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 16px var(--accent);
+  animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{ 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+.subtitle{ color:var(--muted); font-size:13px; letter-spacing:.05em; margin-top:6px; }
+
+/* ---- Selector de dificultad ---- */
+.levels{ display:flex; justify-content:center; gap:8px; margin:18px 0; flex-wrap:wrap; }
+.level{
+  font-family:inherit; font-weight:500; font-size:14px;
+  color:var(--muted); cursor:pointer;
+  padding:9px 16px; border-radius:999px;
+  border:1px solid transparent;
+  background:var(--panel);
+  transition:.18s ease;
+}
+.level:hover{ color:var(--text); transform:translateY(-1px); }
+.level.active{
+  color:var(--bg); background:var(--text);
+  box-shadow:0 4px 18px rgba(0,0,0,.4);
+}
+.level:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+/* ---- Marco del juego ---- */
+.frame{
+  background:linear-gradient(180deg, var(--bg-2), var(--panel));
+  border:1px solid #2c3350;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 24px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+/* ---- HUD: contador / cara / cronómetro ---- */
+.hud{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; margin-bottom:14px;
+}
+/* Los marcadores con aspecto de "display" LED */
+.display{
+  font-family:"JetBrains Mono", monospace; font-weight:800;
+  font-size:24px; letter-spacing:.05em;
+  background:var(--line); color:var(--accent);
+  padding:8px 14px; border-radius:10px;
+  min-width:92px; text-align:center;
+  display:flex; align-items:center; gap:8px; justify-content:center;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.6);
+}
+.display.time{ color:var(--accent-2); }
+.display .ico{ font-size:16px; filter:grayscale(.1); }
+
+/* La carita: botón de nueva partida, con efecto de hundirse al pulsar */
+.face{
+  font-size:30px; line-height:1;
+  width:54px; height:54px; border-radius:14px;
+  border:1px solid #3a4163;
+  background:linear-gradient(180deg, var(--tile-hi), var(--tile));
+  cursor:pointer; display:grid; place-items:center;
+  transition:transform .1s ease, box-shadow .15s ease;
+  box-shadow:0 4px 0 var(--tile-lo), 0 6px 14px rgba(0,0,0,.4);
+}
+.face:hover{ transform:translateY(-1px); }
+.face:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--tile-lo); }
+.face:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+/* ---- Tablero ---- */
+.board-wrap{ overflow:auto; border-radius:10px; }   /* permite scroll si el tablero es grande */
+.board{
+  display:grid;
+  grid-template-columns:repeat(var(--cols), var(--cell));  /* el JS define --cols */
+  gap:3px;
+  margin:0 auto;
+  width:max-content;
+  padding:3px;
+  background:var(--line);
+  border-radius:10px;
+}
+
+/* Cada celda es un <button> con relieve */
+.cell{
+  width:var(--cell); height:var(--cell);
+  border:none; padding:0; margin:0;
+  border-radius:var(--radius);
+  font-family:"JetBrains Mono", monospace;
+  font-weight:800;
+  font-size:calc(var(--cell) * .52);
+  display:grid; place-items:center;
+  cursor:pointer; user-select:none;
+  background:linear-gradient(180deg, var(--tile-hi), var(--tile));
+  box-shadow:0 2px 0 var(--tile-lo), inset 0 1px 0 rgba(255,255,255,.06);
+  transition:transform .06s ease, background .12s ease, box-shadow .12s ease;
+}
+.cell:hover:not(.open):not(.flag){ filter:brightness(1.12); }
+.cell:active:not(.open){ transform:translateY(2px); box-shadow:0 0 0 var(--tile-lo); }
+.cell:focus-visible{ outline:2px solid var(--accent-2); outline-offset:-2px; }
+
+/* Celda revelada: se ve "hundida" y aparece con una pequeña animación */
+.cell.open{
+  background:linear-gradient(180deg, var(--open), var(--open-2));
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.55);
+  cursor:default;
+  animation:reveal .22s ease backwards;
+}
+@keyframes reveal{ from{ transform:scale(.78); opacity:.2 } to{ transform:scale(1); opacity:1 } }
+
+/* Colores de los números según cuántas minas hay alrededor */
+.cell.n1{color:var(--n1)} .cell.n2{color:var(--n2)} .cell.n3{color:var(--n3)}
+.cell.n4{color:var(--n4)} .cell.n5{color:var(--n5)} .cell.n6{color:var(--n6)}
+.cell.n7{color:var(--n7)} .cell.n8{color:var(--n8)}
+
+/* Animación al plantar una bandera */
+.cell.flag{ animation:plant .18s ease; }
+@keyframes plant{ 0%{transform:scale(.5) rotate(-12deg)} 100%{transform:scale(1) rotate(0)} }
+
+/* Estados al perder: mina normal, mina detonada (boom) y bandera equivocada (wrong) */
+.cell.mine{ background:linear-gradient(180deg,#3a1f29,#2a1620); }
+.cell.boom{ background:linear-gradient(180deg,#ff5b5b,#c0392b); animation:boom .4s ease; }
+@keyframes boom{ 0%{transform:scale(1.4)} 50%{transform:scale(.9)} 100%{transform:scale(1)} }
+.cell.wrong{ background:linear-gradient(180deg,#3a2230,#2a1822); }
+.cell.wrong::after{ content:"✕"; color:var(--accent); font-size:calc(var(--cell)*.6); }
+
+/* ---- Controles inferiores ---- */
+.controls{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.flag-toggle{
+  font-family:inherit; font-weight:500; font-size:14px;
+  color:var(--text); cursor:pointer;
+  padding:10px 16px; border-radius:10px;
+  border:1px solid #3a4163; background:var(--panel);
+  display:inline-flex; align-items:center; gap:8px;
+  transition:.16s ease;
+}
+.flag-toggle.on{ background:var(--accent); color:var(--bg); border-color:var(--accent); }
+.flag-toggle:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+.hint{ color:var(--muted); font-size:12.5px; line-height:1.5; flex:1; min-width:180px; text-align:right; }
+
+/* ---- Mensaje de fin (aparece con una transición suave) ---- */
+.msg{
+  text-align:center; margin-top:14px; min-height:22px;
+  font-weight:500; font-size:15px; letter-spacing:.02em;
+  opacity:0; transform:translateY(6px); transition:.25s ease;
+}
+.msg.show{ opacity:1; transform:none; }
+.msg.win{ color:var(--n2); }
+.msg.lose{ color:var(--accent); }
+
+/* Accesibilidad: desactiva animaciones si el usuario lo pidió en su sistema */
+@media (prefers-reduced-motion: reduce){
+  *{ animation:none !important; transition:none !important; }
+}
+/* Ajustes para pantallas pequeñas */
+@media (max-width:520px){
+  .hint{ text-align:center; }
+  .controls{ justify-content:center; }
+}
